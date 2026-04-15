@@ -1,0 +1,72 @@
+sudo apt update
+sudo apt install nodejs npm -y
+
+
+
+cd ~
+mkdir lol-skin-sync && cd lol-skin-sync
+nano sync-skins.mjs
+
+
+
+//JS
+import fs from "fs/promises";
+
+const VERSION_URL = "https://ddragon.leagueoflegends.com/api/versions.json";
+
+async function main() {
+  console.log("🔄 Lade Version...");
+  const versions = await fetch(VERSION_URL).then(r => r.json());
+  const version = versions[0];
+
+  console.log("➡️ Version:", version);
+
+  const champsUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`;
+  const champs = await fetch(champsUrl).then(r => r.json());
+
+  let allSkins = [];
+
+  for (const champKey in champs.data) {
+    const champ = champs.data[champKey];
+
+    const champUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion/${champ.id}.json`;
+    const champData = await fetch(champUrl).then(r => r.json());
+
+    const skins = champData.data[champ.id].skins;
+
+    skins.forEach(skin => {
+      // skip base skin optional
+      if (skin.num === 0) return;
+
+      allSkins.push({
+        id: `${champ.id}_${skin.num}`,
+        champion: champ.id,
+        skin: skin.name,
+        image: `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champ.id}_${skin.num}.jpg`
+      });
+    });
+  }
+
+  console.log(`✅ ${allSkins.length} Skins gefunden`);
+
+  await fs.writeFile("skins.json", JSON.stringify(allSkins, null, 2));
+  console.log("💾 skins.json gespeichert");
+}
+
+main();
+
+///// JS Ende
+
+
+node sync-skins.mjs
+
+
+
+
+
+// fix der speicherung 
+
+sudo mkdir -p /var/www/html/lol-skin-tinder/data
+sudo cp ~/skins.json /var/www/html/lol-skin-tinder/data/skins.json
+
+

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoL Skin Tinder</title>
+  <meta name="description" content="Swipe League of Legends Skins im Tinder-Style" />
+  <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar glass">
+      <div>
+        <p class="eyebrow">Homelab Project</p>
+        <h1>LoL Skin Tinder</h1>
+        <p class="muted">Swipe alle Skins, speichere Matches lokal und filtere nach Champion, Text und Patch.</p>
+      </div>
+
+      <section class="panel">
+        <label class="field-label" for="searchInput">Suche</label>
+        <input id="searchInput" class="input" type="text" placeholder="z. B. Ahri, Star Guardian, PROJECT" />
+
+        <label class="field-label" for="championFilter">Champion</label>
+        <select id="championFilter" class="input">
+          <option value="all">Alle Champions</option>
+        </select>
+
+        <label class="field-label" for="sortMode">Reihenfolge</label>
+        <select id="sortMode" class="input">
+          <option value="default">Original</option>
+          <option value="random">Zufällig</option>
+          <option value="champion">Nach Champion</option>
+          <option value="skin">Nach Skinname</option>
+        </select>
+
+        <div class="toggles">
+          <label><input id="skipBaseSkins" type="checkbox" checked /> Base Skins ausblenden</label>
+          <label><input id="onlyUnrated" type="checkbox" /> Nur unbewertet</label>
+          <label><input id="onlyFemale" type="checkbox" /> Nur weiblich</label>
+          <label><input id="onlyMale" type="checkbox" /> Nur männlich</label>
+          <label><input id="showChromas" type="checkbox" /> Chromas anzeigen</label>
+          <label><input id="mainSkinsOnly" type="checkbox" checked /> Nur Main-Skins / einzigartige Splasharts</label>
+        </div>
+      </section>
+
+      <section class="panel stats-grid">
+        <div>
+          <span class="label">Gesamt</span>
+          <strong id="statTotal">0</strong>
+        </div>
+        <div>
+          <span class="label">Offen</span>
+          <strong id="statRemaining">0</strong>
+        </div>
+        <div>
+          <span class="label">Like</span>
+          <strong id="statLikes">0</strong>
+        </div>
+        <div>
+          <span class="label">Nope</span>
+          <strong id="statDislikes">0</strong>
+        </div>
+      </section>
+
+      <section class="panel actions-panel">
+        <button id="undoBtn" class="btn secondary">Letzten Swipe rückgängig</button>
+        <button id="resetBtn" class="btn danger">Alle Votes löschen</button>
+        <button id="showResultsBtn" class="btn">Ergebnisse anzeigen</button>
+      </section>
+
+      <section class="panel small-note">
+        <p><strong>Steuerung:</strong> ← = Nope, → = Like, ↓ = Skip</p>
+        <p>Standardmäßig sind Chromas ausgeblendet. Zusätzlich blendet "Nur Main-Skins" doppelte Splasharts und viele Spezial-Varianten wie Merc oder The Baddest aus.</p>
+      </section>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar glass">
+        <div>
+          <p class="eyebrow">Swipe Deck</p>
+          <h2 id="deckTitle">Bereit zum Swipen</h2>
+        </div>
+        <div class="topbar-actions">
+          <button id="viewDeckBtn" class="chip active">Deck</button>
+          <button id="viewResultsBtn" class="chip">Matches</button>
+        </div>
+      </header>
+
+      <section id="deckView" class="view active">
+        <div class="deck-wrap">
+          <div class="decision decision-nope">NOPE</div>
+          <div class="decision decision-like">MATCH</div>
+          <div id="cardStack" class="card-stack"></div>
+        </div>
+
+        <div class="swipe-actions glass">
+          <button id="dislikeBtn" class="round-btn nope" aria-label="Nope">✕</button>
+          <button id="skipBtn" class="round-btn skip" aria-label="Skip">↷</button>
+          <button id="likeBtn" class="round-btn like" aria-label="Like">♥</button>
+        </div>
+      </section>
+
+      <section id="resultsView" class="view">
+        <div class="results-layout">
+          <section class="results-column glass">
+            <div class="results-header">
+              <h3>Matches</h3>
+              <span id="likesCountBadge" class="badge">0</span>
+            </div>
+            <div id="likesList" class="results-list"></div>
+          </section>
+
+          <section class="results-column glass">
+            <div class="results-header">
+              <h3>No Match</h3>
+              <span id="dislikesCountBadge" class="badge">0</span>
+            </div>
+            <div id="dislikesList" class="results-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
