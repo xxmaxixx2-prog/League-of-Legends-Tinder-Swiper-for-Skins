@@ -4,6 +4,4 @@
 
 ## Vorschau
 
-<p align="center">
-  <img src="assets/screenshot.png" width="700">
-</p>
+![Preview](./assets/league%20tinder%20swipe%20aracde%20caitlyn%20demo%20bild%20for%20readme.PNG)
