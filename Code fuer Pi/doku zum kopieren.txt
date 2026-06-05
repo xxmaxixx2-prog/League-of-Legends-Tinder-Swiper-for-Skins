@@ -15,11 +15,11 @@ import fs from "fs/promises";
 const VERSION_URL = "https://ddragon.leagueoflegends.com/api/versions.json";
 
 async function main() {
-  console.log("🔄 Lade Version...");
+  console.log("Lade Version...");
   const versions = await fetch(VERSION_URL).then(r => r.json());
   const version = versions[0];
 
-  console.log("➡️ Version:", version);
+  console.log("Version:", version);
 
   const champsUrl = `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`;
   const champs = await fetch(champsUrl).then(r => r.json());
@@ -47,10 +47,10 @@ async function main() {
     });
   }
 
-  console.log(`✅ ${allSkins.length} Skins gefunden`);
+  console.log(`${allSkins.length} Skins gefunden`);
 
   await fs.writeFile("skins.json", JSON.stringify(allSkins, null, 2));
-  console.log("💾 skins.json gespeichert");
+  console.log("skins.json gespeichert");
 }
 
 main();
