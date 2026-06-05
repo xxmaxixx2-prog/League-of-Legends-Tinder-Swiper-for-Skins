@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LoL Skin Tinder</title>
+  <!-- Updated description without newline artifacts -->
   <meta name="description" content="Swipe League of Legends Skins im Tinder-Style" />
   <link rel="preconnect" href="https://ddragon.leagueoflegends.com" />
   <link rel="stylesheet" href="./css/style.css" />
@@ -17,9 +18,10 @@
         <p class="muted">Swipe alle Skins, speichere Matches lokal und filtere nach Champion, Text und Patch.</p>
       </div>
 
+      <!-- Filter and search controls -->
       <section class="panel">
         <label class="field-label" for="searchInput">Suche</label>
-        <input id="searchInput" class="input" type="text" placeholder="z. B. Ahri, Star Guardian, PROJECT" />
+        <input id="searchInput" class="input" type="text" placeholder="z. B. Ahri, Star Guardian, PROJECT" />
 
         <label class="field-label" for="championFilter">Champion</label>
         <select id="championFilter" class="input">
@@ -40,10 +42,11 @@
           <label><input id="onlyFemale" type="checkbox" /> Nur weiblich</label>
           <label><input id="onlyMale" type="checkbox" /> Nur männlich</label>
           <label><input id="showChromas" type="checkbox" /> Chromas anzeigen</label>
-          <label><input id="mainSkinsOnly" type="checkbox" checked /> Nur Main-Skins / einzigartige Splasharts</label>
+          <label><input id="mainSkinsOnly" type="checkbox" checked /> Nur Main‑Skins / einzigartige Splasharts</label>
         </div>
       </section>
 
+      <!-- Statistics display -->
       <section class="panel stats-grid">
         <div>
           <span class="label">Gesamt</span>
@@ -63,18 +66,23 @@
         </div>
       </section>
 
+      <!-- Action buttons including the new randomize button -->
       <section class="panel actions-panel">
         <button id="undoBtn" class="btn secondary">Letzten Swipe rückgängig</button>
         <button id="resetBtn" class="btn danger">Alle Votes löschen</button>
+        <!-- New button to shuffle the current deck randomly -->
+        <button id="randomizeBtn" class="btn secondary">Zufälliges Deck</button>
         <button id="showResultsBtn" class="btn">Ergebnisse anzeigen</button>
       </section>
 
+      <!-- Small note about controls -->
       <section class="panel small-note">
-        <p><strong>Steuerung:</strong> ← = Nope, → = Like, ↓ = Skip</p>
-        <p>Standardmäßig sind Chromas ausgeblendet. Zusätzlich blendet "Nur Main-Skins" doppelte Splasharts und viele Spezial-Varianten wie Merc oder The Baddest aus.</p>
+        <p><strong>Steuerung:</strong> ← = Nope, → = Like, ↓ = Skip</p>
+        <p>Standardmäßig sind Chromas ausgeblendet. Zusätzlich blendet „Nur Main‑Skins“ doppelte Splasharts und viele Spezial‑Varianten wie Merc oder The Baddest aus.</p>
       </section>
     </aside>
 
+    <!-- Main content area with swipe deck and results views -->
     <main class="main-area">
       <header class="topbar glass">
         <div>
@@ -87,6 +95,7 @@
         </div>
       </header>
 
+      <!-- Deck view: cards and swipe buttons -->
       <section id="deckView" class="view active">
         <div class="deck-wrap">
           <div class="decision decision-nope">NOPE</div>
@@ -101,6 +110,7 @@
         </div>
       </section>
 
+      <!-- Results view showing likes and dislikes lists -->
       <section id="resultsView" class="view">
         <div class="results-layout">
           <section class="results-column glass">
@@ -116,13 +126,14 @@
               <h3>No Match</h3>
               <span id="dislikesCountBadge" class="badge">0</span>
             </div>
-            <div id="dislikesList" class="results-list"></div>
+              <div id="dislikesList" class="results-list"></div>
           </section>
         </div>
       </section>
     </main>
   </div>
 
+  <!-- Application entry point -->
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

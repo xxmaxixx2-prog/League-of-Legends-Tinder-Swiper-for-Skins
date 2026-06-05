@@ -27,7 +27,8 @@ const CHAMPION_GENDERS = {
   Annie: "female", Aphelios: "male", Ashe: "female", AurelionSol: "male",
   Aurora: "female", Azir: "male", Bard: "male", Belveth: "female",
   Blitzcrank: "other", Brand: "male", Braum: "male", Briar: "female",
-  Caitlyn: "female", Camille: "female", Cassiopeia: "female", Chogath: "other",
+  Caitlyn: "female", Camille: "female", Cassiopeia: "female", Chogath:
+  "other",
   Corki: "male", Darius: "male", Diana: "female", DrMundo: "male",
   Draven: "male", Ekko: "male", Elise: "female", Evelynn: "female",
   Ezreal: "male", Fiddlesticks: "other", Fiora: "female", Fizz: "male",
@@ -63,7 +64,8 @@ const CHAMPION_GENDERS = {
   Vladimir: "male", Volibear: "male", Warwick: "male", Xayah: "female",
   Xerath: "male", XinZhao: "male", Yasuo: "male", Yone: "male",
   Yorick: "male", Yuumi: "female", Zac: "male", Zed: "male",
-  Zeri: "female", Ziggs: "male", Zilean: "male", Zoe: "female", Zyra: "female"
+  Zeri: "female", Ziggs: "male", Zilean: "male", Zoe: "female", Zyra:
+  "female"
 };
 
 const state = {
@@ -75,6 +77,7 @@ const state = {
   drag: null,
 };
 
+// Map DOM elements to variables for quick access.
 const els = {
   cardStack: document.getElementById("cardStack"),
   deckTitle: document.getElementById("deckTitle"),
@@ -107,8 +110,11 @@ const els = {
   statDislikes: document.getElementById("statDislikes"),
   decisionLike: document.querySelector(".decision-like"),
   decisionNope: document.querySelector(".decision-nope"),
+  // New button for randomizing the deck.
+  randomizeBtn: document.getElementById("randomizeBtn"),
 };
 
+// Wait for the DOM to be fully parsed before fetching data.
 window.addEventListener("DOMContentLoaded", () => {
   fetch("./data/skins.json")
     .then((res) => {
@@ -117,6 +123,7 @@ window.addEventListener("DOMContentLoaded", () => {
     })
     .then((data) => {
       state.sourceSkins = Array.isArray(data) ? dedupeSkins(data) : [];
+      // Expose some internals for debugging in the browser console.
       window.debugLoL = {
         state,
         dedupeSkins,
@@ -139,6 +146,10 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+/**
+ * Initialise the application: populate the champion filter, wire up events,
+ * apply the current filters and render the initial views.
+ */
 function init() {
   populateChampionFilter();
   bindEvents();
@@ -146,6 +157,11 @@ function init() {
   render();
 }
 
+/**
+ * Bind UI event listeners. Whenever filters change we reapply them and
+ * re-render the deck and results. Swipe buttons trigger their respective
+ * actions. Keyboard arrows are mapped to swipe actions.
+ */
 function bindEvents() {
   [
     els.searchInput,
@@ -162,6 +178,7 @@ function bindEvents() {
     el.addEventListener("change", onFiltersChange);
   });
 
+  // Ensure that only one of the gender filters can be active at a time.
   els.onlyFemale.addEventListener("change", () => {
     if (els.onlyFemale.checked) els.onlyMale.checked = false;
   });
@@ -169,6 +186,7 @@ function bindEvents() {
     if (els.onlyMale.checked) els.onlyFemale.checked = false;
   });
 
+  // Voting buttons.
   els.likeBtn.addEventListener("click", () => voteTopCard("like"));
   els.dislikeBtn.addEventListener("click", () => voteTopCard("dislike"));
   els.skipBtn.addEventListener("click", cycleTopCard);
@@ -178,6 +196,10 @@ function bindEvents() {
   els.viewResultsBtn.addEventListener("click", () => setView("results"));
   els.showResultsBtn.addEventListener("click", () => setView("results"));
 
+  // New: clicking this button sets the sort mode to "random" and refreshes the deck.
+  els.randomizeBtn.addEventListener("click", randomizeSkins);
+
+  // Keyboard shortcuts.
   document.addEventListener("keydown", (event) => {
     if (event.key === "ArrowRight") voteTopCard("like");
     if (event.key === "ArrowLeft") voteTopCard("dislike");
@@ -185,11 +207,18 @@ function bindEvents() {
   });
 }
 
+/**
+ * Handler invoked when any of the filter inputs changes. Reapplies the
+ * filters and re-renders the views.
+ */
 function onFiltersChange() {
   applyFilters();
   render();
 }
 
+/**
+ * Apply all active filters and sorting to the list of available skins.
+ */
 function applyFilters() {
   const term = els.searchInput.value.trim().toLowerCase();
   const champ = els.championFilter.value;
@@ -201,6 +230,7 @@ function applyFilters() {
   const showChromas = els.showChromas.checked;
   const mainSkinsOnly = els.mainSkinsOnly.checked;
 
+  // Filter the source skins list based on the current criteria.
   let list = [...state.sourceSkins].filter((skin) => {
     const skinName = getSkinName(skin);
     const championName = getChampionName(skin);
@@ -211,7 +241,10 @@ function applyFilters() {
 
     const matchesText =
       !term ||
-      [skinName, championName, championId].join(" ").toLowerCase().includes(term);
+      [skinName, championName, championId]
+        .join(" ")
+        .toLowerCase()
+        .includes(term);
 
     const matchesChamp = champ === "all" || championId === champ;
     const matchesBase = !skipBase || !skin.isBase;
@@ -219,13 +252,22 @@ function applyFilters() {
     const matchesFemale = !onlyFemale || gender === "female";
     const matchesMale = !onlyMale || gender === "male";
 
-    return matchesText && matchesChamp && matchesBase && matchesRated && matchesFemale && matchesMale;
+    return (
+      matchesText &&
+      matchesChamp &&
+      matchesBase &&
+      matchesRated &&
+      matchesFemale &&
+      matchesMale
+    );
   });
 
+  // Optionally prune to only main skins.
   if (mainSkinsOnly) {
     list = keepOnlyMainSkins(list);
   }
 
+  // Apply sorting. "random" shuffles the list on each application.
   if (sortMode === "random") list = shuffle(list);
   if (sortMode === "champion") {
     list.sort((a, b) =>
@@ -240,14 +282,23 @@ function applyFilters() {
   state.filteredSkins = list;
 }
 
+/**
+ * Render all views that depend on application state: statistics,
+ * the swipe deck and the results lists.
+ */
 function render() {
   renderStats();
   renderDeck();
   renderResults();
 }
 
+/**
+ * Render the swipe deck. Only undecided skins are shown here.
+ */
 function renderDeck() {
-  const undecided = state.filteredSkins.filter((skin) => !state.votes[skin.id]);
+  const undecided = state.filteredSkins.filter(
+    (skin) => !state.votes[skin.id]
+  );
 
   els.cardStack.innerHTML = "";
   els.deckTitle.textContent = undecided.length
@@ -274,6 +325,9 @@ function renderDeck() {
   if (topCard) attachDrag(topCard);
 }
 
+/**
+ * Create a card element for a given skin. Adjusts position based on stack.
+ */
 function createCard(skin, index, total) {
   const card = document.createElement("article");
   card.className = "card";
@@ -302,6 +356,9 @@ function createCard(skin, index, total) {
   return card;
 }
 
+/**
+ * Attach drag handlers to the card for swipe behaviour.
+ */
 function attachDrag(card) {
   const pointerDown = (event) => {
     const startX = event.clientX ?? event.touches?.[0]?.clientX ?? 0;
@@ -312,8 +369,10 @@ function attachDrag(card) {
 
   const pointerMove = (event) => {
     if (!state.drag || state.drag.card !== card) return;
-    const clientX = event.clientX ?? event.touches?.[0]?.clientX ?? state.drag.startX;
-    const clientY = event.clientY ?? event.touches?.[0]?.clientY ?? state.drag.startY;
+    const clientX =
+      event.clientX ?? event.touches?.[0]?.clientX ?? state.drag.startX;
+    const clientY =
+      event.clientY ?? event.touches?.[0]?.clientY ?? state.drag.startY;
     state.drag.dx = clientX - state.drag.startX;
     state.drag.dy = clientY - state.drag.startY;
 
@@ -347,6 +406,10 @@ function attachDrag(card) {
   card.addEventListener("pointercancel", pointerUp);
 }
 
+/**
+ * Vote on the top card with the given type ("like" or "dislike").
+ * If the animation is in progress we animate the vote; otherwise we store directly.
+ */
 function voteTopCard(type) {
   const top = getTopUndecidedSkin();
   if (!top) return;
@@ -360,6 +423,9 @@ function voteTopCard(type) {
   }
 }
 
+/**
+ * Animate the card flying out of the deck and record the vote afterwards.
+ */
 function animateVote(card, type) {
   const direction = type === "like" ? 1 : -1;
   card.style.transition = "transform 0.25s ease, opacity 0.25s ease";
@@ -374,6 +440,9 @@ function animateVote(card, type) {
   }, 180);
 }
 
+/**
+ * Skip the top card by moving it to the bottom of the undecided list.
+ */
 function cycleTopCard() {
   const undecided = state.filteredSkins.filter((skin) => !state.votes[skin.id]);
   if (undecided.length <= 1) return;
@@ -388,6 +457,9 @@ function cycleTopCard() {
   renderStats();
 }
 
+/**
+ * Undo the last vote (like or dislike).
+ */
 function undoVote() {
   const last = state.history.pop();
   if (!last) return;
@@ -400,6 +472,9 @@ function undoVote() {
   render();
 }
 
+/**
+ * Reset all votes after confirming with the user.
+ */
 function resetVotes() {
   if (!window.confirm("Wirklich alle Like/Nope-Votes löschen?")) return;
 
@@ -412,6 +487,9 @@ function resetVotes() {
   render();
 }
 
+/**
+ * Store a vote in local storage and add it to the history for undo support.
+ */
 function storeVote(skinId, type) {
   state.votes[skinId] = type;
   state.history.push({ skinId, type, at: Date.now() });
@@ -419,6 +497,9 @@ function storeVote(skinId, type) {
   saveJson(HISTORY_KEY, state.history);
 }
 
+/**
+ * Render the likes and dislikes lists in the results view.
+ */
 function renderResults() {
   const likes = state.sourceSkins.filter((skin) => state.votes[skin.id] === "like");
   const dislikes = state.sourceSkins.filter((skin) => state.votes[skin.id] === "dislike");
@@ -430,6 +511,9 @@ function renderResults() {
   renderResultList(els.dislikesList, dislikes, "Noch keine No-Matches.");
 }
 
+/**
+ * Render a list of result cards into a container.
+ */
 function renderResultList(container, items, emptyText) {
   container.innerHTML = "";
 
@@ -456,6 +540,9 @@ function renderResultList(container, items, emptyText) {
   });
 }
 
+/**
+ * Render the statistics in the sidebar.
+ */
 function renderStats() {
   const total = state.filteredSkins.length;
   const remaining = state.filteredSkins.filter((skin) => !state.votes[skin.id]).length;
@@ -468,6 +555,10 @@ function renderStats() {
   els.statDislikes.textContent = String(dislikes);
 }
 
+/**
+ * Populate the champion filter dropdown with all available champions found
+ * in the source skins.
+ */
 function populateChampionFilter() {
   els.championFilter.innerHTML = `<option value="all">Alle Champions</option>`;
 
@@ -487,6 +578,9 @@ function populateChampionFilter() {
   });
 }
 
+/**
+ * Set the active view to either "deck" or "results".
+ */
 function setView(view) {
   state.currentView = view;
   els.deckView.classList.toggle("active", view === "deck");
@@ -495,30 +589,51 @@ function setView(view) {
   els.viewResultsBtn.classList.toggle("active", view === "results");
 }
 
+/**
+ * Get the first skin in the filtered list that hasn't been rated yet.
+ */
 function getTopUndecidedSkin() {
   return state.filteredSkins.find((skin) => !state.votes[skin.id]);
 }
 
+/**
+ * Get the champion ID from a skin object.
+ */
 function getChampionId(skin) {
   return String(skin.championId || skin.champion || "").trim();
 }
 
+/**
+ * Get the champion name from a skin object.
+ */
 function getChampionName(skin) {
   return String(skin.championName || skin.champion || "Unknown Champion").trim();
 }
 
+/**
+ * Get the skin name from a skin object.
+ */
 function getSkinName(skin) {
   return String(skin.skinName || skin.skin || "Unknown Skin").trim();
 }
 
+/**
+ * Determine a skin's preferred image URL.
+ */
 function getPreferredImage(skin) {
   return skin.loadingImage || skin.image || skin.splashPath || skin.splash_url || skin.tilePath || "";
 }
 
+/**
+ * Get the champion's gender; defaults to "unknown".
+ */
 function getChampionGender(championId) {
   return CHAMPION_GENDERS[championId] || "unknown";
 }
 
+/**
+ * Normalise a name value to lower-case and collapse whitespace/punctuation.
+ */
 function normalizeName(value) {
   return String(value || "")
     .toLowerCase()
@@ -527,11 +642,17 @@ function normalizeName(value) {
     .trim();
 }
 
+/**
+ * Determine whether a skin name contains a parenthesis variant.
+ */
 function hasParenthesisVariantName(skin) {
   const rawName = getSkinName(skin);
   return PARENTHESIS_VARIANT_NAME_RX.test(String(rawName || ""));
 }
 
+/**
+ * Heuristic to determine whether a skin is a special variant (e.g. Merc, Baddest).
+ */
 function isSpecialVariantSkin(skin) {
   const name = normalizeName(getSkinName(skin));
   if (!name) return false;
@@ -540,6 +661,9 @@ function isSpecialVariantSkin(skin) {
   return SPECIAL_VARIANT_MARKERS.some((marker) => name.includes(marker));
 }
 
+/**
+ * Derive a key for grouping skins by their splash art.
+ */
 function getSplashKey(skin) {
   const raw = getPreferredImage(skin);
   if (!raw) return "";
@@ -551,6 +675,9 @@ function getSplashKey(skin) {
     .trim();
 }
 
+/**
+ * Score a skin for selection as the "main" variant when collapsing duplicates.
+ */
 function scoreMainSkinCandidate(skin) {
   let score = 0;
   const name = getSkinName(skin);
@@ -567,6 +694,9 @@ function scoreMainSkinCandidate(skin) {
   return score;
 }
 
+/**
+ * Filter a list of skins down to one "main" skin per splash image.
+ */
 function keepOnlyMainSkins(items) {
   const withoutNamedVariants = items.filter((skin) => !hasParenthesisVariantName(skin));
   const source = withoutNamedVariants.length ? withoutNamedVariants : items;
@@ -574,7 +704,9 @@ function keepOnlyMainSkins(items) {
 
   for (const skin of source) {
     const splashKey = getSplashKey(skin);
-    const key = splashKey || `fallback:${getChampionId(skin)}:${String(skin.skinNum ?? skin.num ?? skin.id ?? getSkinName(skin)).toLowerCase()}`;
+    const key =
+      splashKey ||
+      `fallback:${getChampionId(skin)}:${String(skin.skinNum ?? skin.num ?? skin.id ?? getSkinName(skin)).toLowerCase()}`;
     const current = bestBySplash.get(key);
 
     if (!current || scoreMainSkinCandidate(skin) > scoreMainSkinCandidate(current)) {
@@ -584,11 +716,16 @@ function keepOnlyMainSkins(items) {
 
   return source.filter((skin) => {
     const splashKey = getSplashKey(skin);
-    const key = splashKey || `fallback:${getChampionId(skin)}:${String(skin.skinNum ?? skin.num ?? skin.id ?? getSkinName(skin)).toLowerCase()}`;
+    const key =
+      splashKey ||
+      `fallback:${getChampionId(skin)}:${String(skin.skinNum ?? skin.num ?? skin.id ?? getSkinName(skin)).toLowerCase()}`;
     return bestBySplash.get(key) === skin;
   });
 }
 
+/**
+ * Heuristic to determine whether a skin is likely a chroma variant.
+ */
 function isLikelyChromaSkin(skin) {
   if (skin.parentSkin !== undefined && skin.parentSkin !== null) return true;
   if (hasParenthesisVariantName(skin)) return true;
@@ -605,6 +742,9 @@ function isLikelyChromaSkin(skin) {
   return false;
 }
 
+/**
+ * Remove duplicate skins based on champion ID, skin number and name.
+ */
 function dedupeSkins(items) {
   const seen = new Map();
 
@@ -622,6 +762,9 @@ function dedupeSkins(items) {
   return [...seen.values()];
 }
 
+/**
+ * Load a JSON value from localStorage with a fallback.
+ */
 function loadJson(key, fallback) {
   try {
     const raw = localStorage.getItem(key);
@@ -631,10 +774,16 @@ function loadJson(key, fallback) {
   }
 }
 
+/**
+ * Persist a JSON value to localStorage.
+ */
 function saveJson(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+/**
+ * Shuffle an array using Fisher–Yates.
+ */
 function shuffle(input) {
   const array = [...input];
   for (let i = array.length - 1; i > 0; i--) {
@@ -644,6 +793,9 @@ function shuffle(input) {
   return array;
 }
 
+/**
+ * Escape HTML entities in a string for safe rendering.
+ */
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -651,4 +803,14 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+/**
+ * Randomize the deck: switch the sort mode to "random" and refresh.
+ * This function is exposed to the randomize button.
+ */
+function randomizeSkins() {
+  els.sortMode.value = "random";
+  applyFilters();
+  render();
 }
