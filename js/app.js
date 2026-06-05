@@ -110,6 +110,9 @@ const els = {
   statDislikes: document.getElementById("statDislikes"),
   decisionLike: document.querySelector(".decision-like"),
   decisionNope: document.querySelector(".decision-nope"),
+
+  // Checkbox to restrict results to skins from the latest game patch
+  latestPatchOnly: document.getElementById("latestPatchOnly"),
 };
 
 // Wait for the DOM to be fully parsed before fetching data.
@@ -171,6 +174,7 @@ function bindEvents() {
     els.onlyMale,
     els.showChromas,
     els.mainSkinsOnly,
+    els.latestPatchOnly,
   ].forEach((el) => {
     if (!el) return;
     el.addEventListener("input", onFiltersChange);
@@ -262,6 +266,16 @@ function applyFilters() {
   // Optionally prune to only main skins.
   if (mainSkinsOnly) {
     list = keepOnlyMainSkins(list);
+  }
+
+  // If the latest-patch toggle is active, restrict the list to skins from the newest patch.
+  if (els.latestPatchOnly && els.latestPatchOnly.checked) {
+    // Determine the latest patch across all source skins. We'll parse version strings like "16.11.1".
+    const allPatches = state.sourceSkins.map((s) => s.patch);
+    const latest = allPatches.reduce((max, p) => {
+      return comparePatchVersions(p, max) > 0 ? p : max;
+    }, allPatches[0] || "0");
+    list = list.filter((s) => s.patch === latest);
   }
 
   // Apply sorting. "random" shuffles the list on each application.
@@ -788,6 +802,26 @@ function shuffle(input) {
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+}
+
+/**
+ * Compare two patch version strings such as "16.11.1". Returns 1 if `a` is newer than `b`,
+ * -1 if `a` is older, and 0 if they are equal. Handles different segment lengths.
+ */
+function comparePatchVersions(a, b) {
+  // Guard against undefined values
+  if (!a) return b ? -1 : 0;
+  if (!b) return a ? 1 : 0;
+  const pa = a.split('.').map((x) => parseInt(x, 10) || 0);
+  const pb = b.split('.').map((x) => parseInt(x, 10) || 0);
+  const maxLength = Math.max(pa.length, pb.length);
+  for (let i = 0; i < maxLength; i++) {
+    const na = pa[i] ?? 0;
+    const nb = pb[i] ?? 0;
+    if (na > nb) return 1;
+    if (na < nb) return -1;
+  }
+  return 0;
 }
 
 /**

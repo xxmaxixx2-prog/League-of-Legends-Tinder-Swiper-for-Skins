@@ -348,3 +348,14 @@ select option {
   background: var(--bg);
   color: var(--text);
 }
+
+/* Style the select elements themselves so the drop-down anchor uses dark background */
+select.input {
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+}
+
+select.input option {
+  background: var(--bg);
+  color: var(--text);
+}
