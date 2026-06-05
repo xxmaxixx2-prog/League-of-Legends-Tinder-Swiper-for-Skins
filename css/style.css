@@ -17,23 +17,6 @@
   --select-border: rgba(255, 255, 255, 0.18);
 }
 
-/*
- * Footer styling
- *
- * The footer contains the legal boilerplate required by Riot Games. It
- * appears at the bottom of the page below the main content and uses
- * muted colours consistent with the rest of the UI. The .glass
- * utility class gives it a translucent card-like appearance.
- */
-.footer {
-  margin-top: 24px;
-  padding: 16px;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--muted);
-  border-radius: var(--radius);
-}
-
 * {
   box-sizing: border-box;
 }
@@ -113,6 +96,30 @@ h2 {
 .muted {
   color: var(--muted);
   line-height: 1.5;
+}
+
+/* Footer styles */
+.footer {
+  margin-top: 24px;
+  padding: 16px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  border-radius: var(--radius);
+}
+
+.creator {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.footer a {
+  color: #92a4ff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
 }
 
 .panel {
