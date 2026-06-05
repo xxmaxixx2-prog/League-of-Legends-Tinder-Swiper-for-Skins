@@ -1,0 +1,33 @@
+/* =========================================================
+   LoL Skin Tinder - Select Dropdown Fix
+   Problem:
+   Native Browser-Dropdowns können option{}-Styles teilweise ignorieren.
+   Wenn das Select-Feld dunkel ist und weiße Schrift erbt, wird das
+   aufgeklappte native Dropdown manchmal weiß mit weißer Schrift.
+
+   Lösung:
+   Nur die Select-Felder werden auf hellen Hintergrund + dunkle Schrift gesetzt.
+   Dadurch ist sowohl das geschlossene Feld als auch die geöffnete Liste lesbar.
+   Diese Regeln bitte ganz ans Ende von css/style.css kopieren.
+   ========================================================= */
+
+select.input,
+select.input:focus,
+select.input:hover {
+  background: #ffffff !important;
+  color: #07111f !important;
+  color-scheme: light;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+select.input option,
+select.input optgroup {
+  background: #ffffff !important;
+  color: #07111f !important;
+}
+
+select.input option:checked,
+select.input option:hover {
+  background: #dbe5ff !important;
+  color: #07111f !important;
+}
