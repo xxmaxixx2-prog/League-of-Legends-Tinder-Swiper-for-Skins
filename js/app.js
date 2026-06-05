@@ -110,8 +110,6 @@ const els = {
   statDislikes: document.getElementById("statDislikes"),
   decisionLike: document.querySelector(".decision-like"),
   decisionNope: document.querySelector(".decision-nope"),
-  // New toggle for random order
-  randomOrder: document.getElementById("randomOrder"),
 };
 
 // Wait for the DOM to be fully parsed before fetching data.
@@ -173,8 +171,6 @@ function bindEvents() {
     els.onlyMale,
     els.showChromas,
     els.mainSkinsOnly,
-    // Listen for changes on the random order toggle as part of the filters
-    els.randomOrder,
   ].forEach((el) => {
     if (!el) return;
     el.addEventListener("input", onFiltersChange);
@@ -223,8 +219,7 @@ function onFiltersChange() {
 function applyFilters() {
   const term = els.searchInput.value.trim().toLowerCase();
   const champ = els.championFilter.value;
-  // If the random order toggle is active, override the sort mode to random. Otherwise use the selected mode.
-  const sortMode = (els.randomOrder && els.randomOrder.checked) ? "random" : els.sortMode.value;
+  const sortMode = els.sortMode.value;
   const skipBase = els.skipBaseSkins.checked;
   const onlyUnrated = els.onlyUnrated.checked;
   const onlyFemale = els.onlyFemale.checked;
