@@ -110,8 +110,8 @@ const els = {
   statDislikes: document.getElementById("statDislikes"),
   decisionLike: document.querySelector(".decision-like"),
   decisionNope: document.querySelector(".decision-nope"),
-  // New button for randomizing the deck.
-  randomizeBtn: document.getElementById("randomizeBtn"),
+  // New toggle for random order
+  randomOrder: document.getElementById("randomOrder"),
 };
 
 // Wait for the DOM to be fully parsed before fetching data.
@@ -173,7 +173,10 @@ function bindEvents() {
     els.onlyMale,
     els.showChromas,
     els.mainSkinsOnly,
+    // Listen for changes on the random order toggle as part of the filters
+    els.randomOrder,
   ].forEach((el) => {
+    if (!el) return;
     el.addEventListener("input", onFiltersChange);
     el.addEventListener("change", onFiltersChange);
   });
@@ -196,8 +199,6 @@ function bindEvents() {
   els.viewResultsBtn.addEventListener("click", () => setView("results"));
   els.showResultsBtn.addEventListener("click", () => setView("results"));
 
-  // New: clicking this button sets the sort mode to "random" and refreshes the deck.
-  els.randomizeBtn.addEventListener("click", randomizeSkins);
 
   // Keyboard shortcuts.
   document.addEventListener("keydown", (event) => {
@@ -222,7 +223,8 @@ function onFiltersChange() {
 function applyFilters() {
   const term = els.searchInput.value.trim().toLowerCase();
   const champ = els.championFilter.value;
-  const sortMode = els.sortMode.value;
+  // If the random order toggle is active, override the sort mode to random. Otherwise use the selected mode.
+  const sortMode = (els.randomOrder && els.randomOrder.checked) ? "random" : els.sortMode.value;
   const skipBase = els.skipBaseSkins.checked;
   const onlyUnrated = els.onlyUnrated.checked;
   const onlyFemale = els.onlyFemale.checked;
@@ -809,8 +811,3 @@ function escapeHtml(value) {
  * Randomize the deck: switch the sort mode to "random" and refresh.
  * This function is exposed to the randomize button.
  */
-function randomizeSkins() {
-  els.sortMode.value = "random";
-  applyFilters();
-  render();
-}
